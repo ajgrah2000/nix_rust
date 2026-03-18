@@ -53,13 +53,44 @@
   
               CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
               CARGO_HOME = "${placeholder "out"}/cargo-home";
+#              EMCC_CFLAGS="-s USE_SDL=2 -sSIDE_MODULE=0 -sEXPORTED_FUNCTIONS=_main,_display_data -sEXPORTED_RUNTIME_METHODS=ccall,cwrap";
+#              EM_CONFIG="emcc --generate-config";
+#              EM_CONFIG="emcc --generate-config --em-config $HOME/.emscripten";
+#              EM_CONFIG="$HOME/.emscripten emcc --generate-config";
+#              EM_CACHE="$HOME/.emscripten_cache";
+#              EMCC_CACHE="$HOME/.emscripten_cache";
+#              CACHE="$HOME/.cache";
   
               src = rustsega;
   
               buildInputs = [ 
                 toolchain 
                 pkgs.SDL2
+                # Emscripten dependencies
+                pkgs.emscripten
+                pkgs.clang
+                pkgs.gcc
+                pkgs.nodejs
+                pkgs.binaryen
+                pkgs.llvm
               ];
+
+              shellHook = ''
+                echo "JEMCC_CACHE=$HOME/.emscripten_cache" > .emscripten;
+                cat .emscripten
+
+              '';
+#              shellHook = ''
+#                export EM_CACHE="$HOME/.emscripten_cache";
+#                export EMCC_CACHE="$HOME/.emscripten_cache";
+#                export CACHE="$HOME/.cache";
+#                export EM_CONFIG=$(pwd)/.emscripten
+#                if [ ! -f "$EM_CONFIG" ]; then
+#                  echo "Generating emscripten config.."
+#                  emcc --check # Generates default config
+#                fi
+#                echo ${pkgs.emscripten}
+#              '';
   
               buildPhase = ''
                 cd $src/projects/emscripten
