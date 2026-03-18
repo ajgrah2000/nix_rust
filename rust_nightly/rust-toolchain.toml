@@ -1,0 +1,8 @@
+[toolchain]
+channel = "nightly"
+# Optionally specify components like "rust-src" or "clippy"
+components = [ "rustfmt", "clippy", "cargo" ]
+targets = [
+        "wasm32-unknown-unknown",
+        "wasm32-unknown-emscripten"
+]
