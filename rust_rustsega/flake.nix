@@ -1,5 +1,5 @@
 {
-  description = "Second flake that uses the shared Rust toolchain (works with 'nix develop' but not 'nix shell')";
+  description = "Multi-target Rust build (native, Windows, Emscripten) with shared toolchain";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -20,90 +20,114 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+
         toolchain = rust-nightly.packages.${system}.rustToolchain;
 
-        commonInputs = [ 
-                toolchain 
-                pkgs.SDL2];
+        # Shared cargo dirs for reproducibility
+        cargoEnv = {
+          CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
+          CARGO_HOME       = "${placeholder "out"}/cargo-home";
+        };
+
+        # Shared Rust inputs for all targets
+        commonInputs = [
+          toolchain
+          pkgs.SDL2
+        ];
+
+        # Helper to build Rust packages
+        mkRustBuild = {
+          name,
+          version,
+          src,
+          buildInputs,
+          extraEnv ? {},
+          buildPhase
+        }:
+          pkgs.stdenv.mkDerivation (
+            {
+              inherit name version src buildInputs;
+            }
+            // cargoEnv
+            // extraEnv
+            // {
+              buildPhase = ''
+                cd $src
+                mkdir -p "$CARGO_HOME" "$CARGO_TARGET_DIR"
+                ${buildPhase}
+              '';
+            }
+          );
 
       in
       {
         packages = {
-            native = pkgs.stdenv.mkDerivation {
-              pname = "rust_rustsega";
-              version = "0.0.1-native";
-  
-              CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
-              CARGO_HOME = "${placeholder "out"}/cargo-home";
-  
-              src = rustsega;
-  
-              buildInputs = commonInputs;
-  
-              buildPhase = ''
-                cd $src
-                mkdir -p "$CARGO_HOME" "$CARGO_TARGET_DIR"
-                cargo build --release
-              '';
+          native = mkRustBuild {
+            name = "rust_rustsega";
+            version = "0.0.1-native";
+            src = rustsega;
+
+            buildInputs = commonInputs;
+
+            buildPhase = ''
+              cargo build --release
+            '';
+          };
+
+          windows = mkRustBuild {
+            name = "rust_rustsega";
+            version = "0.0.1-windows";
+            src = rustsega;
+          
+            buildInputs = commonInputs ++ [
+              pkgs.pkgsCross.mingwW64.stdenv.cc
+              pkgs.pkgsCross.mingwW64.SDL2
+              pkgs.pkgsCross.mingwW64.sdl3
+              pkgs.pkgsCross.mingwW64.windows.pthreads
+            ];
+          
+            extraEnv = {
+              CARGO_BUILD_TARGET = "x86_64-pc-windows-gnu";
+              RUSTFLAGS =
+                "-L native=${pkgs.pkgsCross.mingwW64.SDL2}/lib " +
+                "-L native=${pkgs.pkgsCross.mingwW64.windows.pthreads}/lib";
             };
+          
+            # For the current package versions of nix both 'SDL2.dll' and 'SDL3.dll' is needed.
+            buildPhase = ''
+              cargo build --release
+              cp ${pkgs.pkgsCross.mingwW64.SDL2.dev}/bin/SDL2.dll \
+                 $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/
+              cp ${pkgs.pkgsCross.mingwW64.sdl3.out}/bin/SDL3.dll \
+                 $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/
+            '';
+          };
 
-            windows = pkgs.stdenv.mkDerivation {
-              pname = "rust_rustsega";
-              version = "0.0.1-windows";
-  
-              CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
-              CARGO_HOME = "${placeholder "out"}/cargo-home";
-  
-              src = rustsega;
-  
-              buildInputs = [ 
-                pkgs.pkgsCross.mingwW64.stdenv.cc
-                pkgs.pkgsCross.mingwW64.SDL2
-              ] ++ commonInputs;
+          emscripten = mkRustBuild {
+            name = "rust_rustsega";
+            version = "0.0.1-emscripten";
+            src = rustsega;
 
-              CARGO_BUILD_TARGET="x86_64-pc-windows-gnu";
-              RUSTFLAGS="-L native=${pkgs.pkgsCross.mingwW64.SDL2}/lib -L native=${pkgs.pkgsCross.mingwW64.windows.pthreads}/lib";
-  
-              buildPhase = ''
-                cd $src
-                cargo build --release
-                cp ${pkgs.pkgsCross.mingwW64.SDL2.dev}/bin/SDL2.dll $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/
-              '';
+            buildInputs = commonInputs ++ [
+              pkgs.emscripten
+            ];
 
-  
-            };
-  
-            emscripten = pkgs.stdenv.mkDerivation {
-              pname = "rust_rustsega";
-              version = "0.0.1-emscripten";
-  
-              CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
-              CARGO_HOME = "${placeholder "out"}/cargo-home";
-  
-              src = rustsega;
-  
-              buildInputs = [ 
-                pkgs.emscripten
-              ] ++ commonInputs;
+            buildPhase = ''
+              cd projects/emscripten
+              cargo build --release
+            '';
+          };
 
-              buildPhase = ''
-                cd $src/projects/emscripten
-                mkdir -p "$CARGO_HOME" "$CARGO_TARGET_DIR"
-                cargo build --release
-              '';
-  
-            };
+          all = pkgs.symlinkJoin {
+            name = "all-targets";
+            paths = [
+              self.packages.${system}.native
+              self.packages.${system}.windows
+              self.packages.${system}.emscripten
+            ];
+          };
 
-            all = pkgs.symlinkJoin {
-              name = "all-targets";
-              paths = [
-                self.packages.${system}.native
-                self.packages.${system}.windows
-                self.packages.${system}.emscripten
-              ];
-            };
-  
-           default = self.packages.${system}.all;
+          default = self.packages.${system}.all;
         };
 
         devShells.default = pkgs.mkShell {
@@ -115,8 +139,7 @@
             pkgs.pkgsCross.mingwW64.stdenv.cc
           ];
         };
-    }
+      }
     );
-
 }
 
