@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: cachix/install-nix-action@v27
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -17,7 +19,7 @@ jobs:
           extra-nix-config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = https://cache.nixos.org/
-      
+
       - name: Build Rust Sega with Nix
         run: |
               cd rust_rustsega

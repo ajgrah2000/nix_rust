@@ -40,13 +40,14 @@
           name,
           version,
           src,
+          cargoHash,
           buildInputs,
           extraEnv ? {},
           buildPhase
         }:
           pkgs.stdenv.mkDerivation (
             {
-              inherit name version src buildInputs;
+              inherit name version src buildInputs cargoHash;
             }
             // cargoEnv
             // extraEnv
@@ -63,6 +64,7 @@
       {
         packages = {
           native = mkRustBuild {
+            cargoHash = "";
             name = "rust_rustsega";
             version = "0.0.1-native";
             src = rustsega;
@@ -75,6 +77,7 @@
           };
 
           windows = mkRustBuild {
+            cargoHash = "";
             name = "rust_rustsega";
             version = "0.0.1-windows";
             src = rustsega;
@@ -104,6 +107,7 @@
           };
 
           emscripten = mkRustBuild {
+            cargoHash = "";
             name = "rust_rustsega";
             version = "0.0.1-emscripten";
             src = rustsega;
