@@ -20,6 +20,14 @@
           rustToolchain = rustToolchain;
           default = rustToolchain;
         };
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [
+            rustToolchain
+            pkgs.pkg-config
+            pkgs.openssl
+          ];
+        };
       }
     );
 }
