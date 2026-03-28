@@ -19,7 +19,7 @@ jobs:
             substituters = https://cache.nixos.org/
       
       - name: Build Rust Sega with Nix
-        run: 
-          cd rust_rustsega
-          nix build .
+        run: |
+              cd rust_rustsega
+              nix build .
 
