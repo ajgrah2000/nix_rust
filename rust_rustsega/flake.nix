@@ -41,18 +41,15 @@
           pname,
           nativeBuildInputs ? {},
           version,
-          src,
-          cargoLock,
           checkPhase,
           installPhase ,
-          cargoHash,
           buildInputs,
           extraEnv ? {},
           buildPhase
         }:
           platform.buildRustPackage (
             {
-              inherit pname version src buildInputs cargoHash;
+              inherit pname version buildInputs;
             }
             // cargoEnv
             // extraEnv
@@ -68,7 +65,17 @@
                 mkdir -p "$CARGO_HOME" "$CARGO_TARGET_DIR"
                 ${buildPhase}
               '';
-            }
+
+              # All targets use the same source/cargo lock.
+              src = rustsega;
+
+              cargoLock = {
+                lockFile = rustsega + "/Cargo.lock";
+              };
+          
+              cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
+
+              }
           );
 
       in
@@ -77,26 +84,20 @@
           native = mkRustBuild {
             pname = "rust_rustsega";
             version = "0.0.1-native";
-          
-            src = rustsega;
-          
-            cargoLock = {
-              lockFile = rustsega + "/Cargo.lock";
-            };
-          
-            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
- 
-            checkPhase = "";
-          
+
             buildInputs = commonInputs;
 
             extraEnv = {
               CARGO_BUILD_TARGET = "x86_64-unknown-linux-gnu";
             };
  
+            # Oh my, this can't be right...
             buildPhase = ''
-              cargo build --release
+              cargo build --offline --release --target=$CARGO_BUILD_TARGET --config $NIX_BUILD_TOP/.cargo/config.toml
             '';
+
+            # Need to disable checks, until the source repo is fixed.
+            checkPhase = "";
  
             # Currently no install for 'native', would need to package dependencies for it to work.
             installPhase = ''
@@ -106,14 +107,6 @@
           windows = mkRustBuild {
             pname = "rust_rustsega";
             version = "0.0.1-windows";
-
-            src = rustsega;
-
-            cargoLock = {
-              lockFile = rustsega + "/Cargo.lock";
-            };
-          
-            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
 
             checkPhase = "";
           
@@ -137,8 +130,9 @@
           
             # For the current package versions of nix both 'SDL2.dll' and 'SDL3.dll' is needed.
             buildPhase = ''
-              cargo build --release
+              cargo build --offline --release --target=$CARGO_BUILD_TARGET --config $NIX_BUILD_TOP/.cargo/config.toml
               '';
+
             installPhase = ''
                mkdir -p $out/$CARGO_BUILD_TARGET/bin
                cp ${pkgs.pkgsCross.mingwW64.SDL2.dev}/bin/SDL2.dll $out/$CARGO_BUILD_TARGET/bin
@@ -150,14 +144,6 @@
           emscripten = mkRustBuild {
             pname = "rust_rustsega";
             version = "0.0.1-emscripten";
-
-            src = rustsega;
-
-            cargoLock = {
-              lockFile = rustsega + "/Cargo.lock";
-            };
-          
-            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
 
             checkPhase = "";
           
@@ -177,12 +163,14 @@
             buildPhase = ''
               echo em ${pkgs.emscripten}
               cd projects/emscripten
-              cargo build --release --target=$CARGO_BUILD_TARGET
+              cargo build --offline --release --target=$CARGO_BUILD_TARGET --config $NIX_BUILD_TOP/.cargo/config.toml
             '';
             installPhase = ''
-              mkdir -p $out/$CARGO_BUILD_TARGET
-              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.wasm $out/$CARGO_BUILD_TARGET
-              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.js $out/$CARGO_BUILD_TARGET
+              mkdir -p $out/website/target/$CARGO_BUILD_TARGET/release/
+              cp $src/index.html $out/website/
+              cp $src/file_drop.js $out/website/
+              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.wasm $out/website/target/$CARGO_BUILD_TARGET/release/
+              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.js $out/website/target/$CARGO_BUILD_TARGET/release/
             '';
           };
 
