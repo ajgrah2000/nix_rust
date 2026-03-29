@@ -14,10 +14,15 @@
         pkgs = import nixpkgs { inherit system overlays; };
 
         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+        rustPlatform = pkgs.makeRustPlatform {
+          cargo = rustToolchain;
+          rustc = rustToolchain;
+        };
       in
       {
         packages = {
           rustToolchain = rustToolchain;
+          rustPlatform = rustPlatform;
           default = rustToolchain;
         };
 
