@@ -22,6 +22,11 @@ jobs:
 
       - name: Build Rust Sega with Nix
         run: |
+              git status
+              cat ../rust_nightly/flake.nix
+              nix flake update
+              git status
+              git diff
               cd rust_rustsega
               nix build .
 
