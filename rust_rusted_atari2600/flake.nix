@@ -7,16 +7,16 @@
 
     rust-nightly.url = "path:../rust_nightly";
 
-    rustsega = {
+    rusted_atari2600 = {
       type = "github";
       owner = "ajgrah2000";
-      repo = "rustsega";
+      repo = "rusted_atari2600";
       ref = "master";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, rust-nightly, rustsega }:
+  outputs = { self, nixpkgs, flake-utils, rust-nightly, rusted_atari2600 }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -67,10 +67,10 @@
               '';
 
               # All targets use the same source/cargo lock.
-              src = rustsega;
+              src = rusted_atari2600;
 
               cargoLock = {
-                lockFile = rustsega + "/Cargo.lock";
+                lockFile = rusted_atari2600 + "/Cargo.lock";
               };
           
               cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
@@ -82,7 +82,7 @@
       {
         packages = {
           native = mkRustBuild {
-            pname = "rust_rustsega";
+            pname = "rust_rusted_atari2600";
             version = "0.0.1-native";
 
             buildInputs = commonInputs;
@@ -99,13 +99,17 @@
             # Need to disable checks, until the source repo is fixed.
             checkPhase = "";
  
-            # Currently no install for 'native', would need to package dependencies for it to work.
+            # The install isn't (currently) re-distributable.
             installPhase = ''
+               mkdir -p $out/$CARGO_BUILD_TARGET/bin
+               echo "binary shared objects aren't re-distributable" >> $out/$CARGO_BUILD_TARGET/bin/NOTE.txt
+               cp $src/palette_*.dat $out/$CARGO_BUILD_TARGET/bin
+               cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/rusted_atari2600 $out/$CARGO_BUILD_TARGET/bin/
             '';
           };
 
           windows = mkRustBuild {
-            pname = "rust_rustsega";
+            pname = "rust_rusted_atari2600";
             version = "0.0.1-windows";
 
             checkPhase = "";
@@ -135,14 +139,15 @@
 
             installPhase = ''
                mkdir -p $out/$CARGO_BUILD_TARGET/bin
+               cp $src/palette_*.dat $out/$CARGO_BUILD_TARGET/bin
                cp ${pkgs.pkgsCross.mingwW64.SDL2.dev}/bin/SDL2.dll $out/$CARGO_BUILD_TARGET/bin
                cp ${pkgs.pkgsCross.mingwW64.sdl3.out}/bin/SDL3.dll $out/$CARGO_BUILD_TARGET/bin
-               cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/rustsega.exe $out/$CARGO_BUILD_TARGET/bin/
+               cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/rusted_atari2600.exe $out/$CARGO_BUILD_TARGET/bin/
              '';
           };
 
           emscripten = mkRustBuild {
-            pname = "rust_rustsega";
+            pname = "rust_rusted_atari2600";
             version = "0.0.1-emscripten";
 
             checkPhase = "";
