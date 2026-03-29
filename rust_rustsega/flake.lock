@@ -129,16 +129,16 @@
     "rustsega": {
       "flake": false,
       "locked": {
-        "lastModified": 1713657203,
-        "narHash": "sha256-pJ6wTJVAjSNDRlbkwV8PJMIKxqJIjGukPGbfP6GPJVE=",
+        "lastModified": 1774764263,
+        "narHash": "sha256-cfwUqtxnnUgMGLrlfCgzXTICxzoiaqUq8KaoSwgtfJs=",
         "owner": "ajgrah2000",
         "repo": "rustsega",
-        "rev": "474c930951d070ef97c8d46e3e180e9988f4cd7d",
+        "rev": "50adfdae71fa91301c096e8a372ccfee472c9f0d",
         "type": "github"
       },
       "original": {
         "owner": "ajgrah2000",
-        "ref": "master",
+        "ref": "minor_build_refresh",
         "repo": "rustsega",
         "type": "github"
       }

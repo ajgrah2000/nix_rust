@@ -11,7 +11,7 @@
       type = "github";
       owner = "ajgrah2000";
       repo = "rustsega";
-      ref = "master";
+      ref = "minor_build_refresh";
       flake = false;
     };
   };
