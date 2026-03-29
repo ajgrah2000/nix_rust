@@ -99,11 +99,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "path": "../rust_nightly",
+        "path": "./../rust_nightly",
         "type": "path"
       },
       "original": {
-        "path": "../rust_nightly",
+        "path": "./../rust_nightly",
         "type": "path"
       },
       "parent": []
