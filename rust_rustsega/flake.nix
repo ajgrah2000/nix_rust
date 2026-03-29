@@ -84,7 +84,8 @@
               lockFile = rustsega + "/Cargo.lock";
             };
           
-            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
+            cargoHash = "";
+#            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
  
             checkPhase = "";
           
@@ -113,7 +114,8 @@
               lockFile = rustsega + "/Cargo.lock";
             };
           
-            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
+            cargoHash = "";
+#            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
 
             checkPhase = "";
           
@@ -157,7 +159,8 @@
               lockFile = rustsega + "/Cargo.lock";
             };
           
-            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
+            cargoHash = "";
+#            cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
 
             checkPhase = "";
           
