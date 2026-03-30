@@ -1,4 +1,4 @@
-name: "Nix Build Rust Sega"
+name: "Nix Build Rust Sega and Atari"
 on:
   push:
   pull_request:
@@ -135,7 +135,7 @@ jobs:
             gh release create "${{ env.AUTO_TAG_NAME }}"
 
   create_sega_windows_release:
-    name: Create windows release from cached results
+    name: Create sega windows release from cached results
     runs-on: ubuntu-latest
     needs: [create_release, build]
 
@@ -155,7 +155,7 @@ jobs:
             gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/sega_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
 
   create_atari_windows_release:
-    name: Create windows release from cached results
+    name: Create atari windows release from cached results
     runs-on: ubuntu-latest
     needs: [create_release, build]
 
