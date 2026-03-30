@@ -30,44 +30,44 @@ jobs:
               # setting sandbox to false, to bypass my current nightmare of nix + rust + emscripton + SDL2.  Saving battle for another day.
               nix build . --option sandbox false
 
-    - name: Artifact generation - emscripten
-      #if: startsWith(github.event.ref, 'refs/tags/')
-      uses: actions/upload-artifact@v4
-      with:
-        name: emscripten_artifact_${{ env.AUTO_TAG_NAME }}
-        path: |
-              result/website/**/*
+      - name: Artifact generation - emscripten
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: emscripten_artifact_${{ env.AUTO_TAG_NAME }}
+          path: |
+                result/website/**/*
 
-    - name: Create Release Zip - emscripten 
-      #if: startsWith(github.event.ref, 'refs/tags/')
-      run: |
-           cd ..
-           zip -r ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip ${{ env.PROJ_NAME }}/result/website/
+      - name: Create Release Zip - emscripten
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        run: |
+             cd ..
+             zip -r ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip ${{ env.PROJ_NAME }}/result/website/
 
-    - name: Cache emscripten release
-      uses: actions/cache@v4
-      with: 
-        path: ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
-        key: emscripten-zip_${{ github.sha }}
+      - name: Cache emscripten release
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+          key: emscripten-zip_${{ github.sha }}
 
-    - name: Artifact generation - Windows
-      #if: startsWith(github.event.ref, 'refs/tags/')
-      uses: actions/upload-artifact@v4
-      with:
-        name: windows_artifact_${{ env.AUTO_TAG_NAME }}
-        path: |
-              result/x86_64-pc-windows-gnu/bin/${{ env.PROJ_NAME }}.exe
+      - name: Artifact generation - Windows
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_artifact_${{ env.AUTO_TAG_NAME }}
+          path: |
+                result/x86_64-pc-windows-gnu/bin/${{ env.PROJ_NAME }}.exe
 
-    - name: Create Release Zip - windows 
-      #if: startsWith(github.event.ref, 'refs/tags/')
-      run: |
-           cd ..
-           zip -r -j ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip ${{ env.PROJ_NAME }}/result/x86_64-pc-windows-gnu/bin/${{ env.PROJ_NAME }}.exe ${{ env.PROJ_NAME }}/palette_*.dat
-    - name: Cache windows release
-      uses: actions/cache@v4
-      with: 
-        path: ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
-        key: windows-zip_${{ github.sha }}
+      - name: Create Release Zip - windows
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        run: |
+             cd ..
+             zip -r -j ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip ${{ env.PROJ_NAME }}/result/x86_64-pc-windows-gnu/bin/${{ env.PROJ_NAME }}.exe ${{ env.PROJ_NAME }}/palette_*.dat
+      - name: Cache windows release
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+          key: windows-zip_${{ github.sha }}
 
   create_windows_release:
     name: Create windows release from cached results
@@ -78,11 +78,11 @@ jobs:
     - uses: actions/checkout@main
     - name: Cache windows release
       uses: actions/cache@v4
-      with: 
+      with:
         path: ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
         key: windows-zip_${{ github.sha }}
 
-    - name: Release Artifacts - windows 
+    - name: Release Artifacts - windows
       #if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -98,11 +98,11 @@ jobs:
     - uses: actions/checkout@main
     - name: Cache emscripten release
       uses: actions/cache@v4
-      with: 
+      with:
         path: ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
         key: emscripten-zip_${{ github.sha }}
 
-    - name: Release Artifacts - emscripten 
+    - name: Release Artifacts - emscripten
       #if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
