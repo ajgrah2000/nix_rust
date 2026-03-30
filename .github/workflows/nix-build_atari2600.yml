@@ -38,7 +38,7 @@ jobs:
         with:
           name: emscripten_artifact_${{ env.AUTO_TAG_NAME }}
           path: |
-                result/website/**/*
+                rust_rusted_atari2600/result/website/**/*
 
       - name: Create Release Zip - emscripten
         #if: startsWith(github.event.ref, 'refs/tags/')

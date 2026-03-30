@@ -32,45 +32,91 @@ jobs:
               # setting sandbox to false, to bypass my current nightmare of nix + rust + emscripton + SDL2.  Saving battle for another day.
               nix build . --option sandbox false
 
-      - name: Artifact generation - emscripten
+      - name: Build Rust Atari with Nix
+        run: |
+              cd rust_rusted_atari2600
+              # setting sandbox to false, to bypass my current nightmare of nix + rust + emscripton + SDL2.  Saving battle for another day.
+              nix build . --option sandbox false
+
+      - name: Artifact generation - emscripten Sega
         #if: startsWith(github.event.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
-          name: emscripten_artifact_${{ env.AUTO_TAG_NAME }}
+          name: sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}
           path: |
-                result/website/**/*
+                rust_rustsega/result/website/**/*
 
-      - name: Create Release Zip - emscripten
-        #if: startsWith(github.event.ref, 'refs/tags/')
-        run: |
-             cd ..
-             zip -r ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rustsega/result/website/
-
-      - name: Cache emscripten release
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
-          key: emscripten-zip_${{ github.sha }}
-
-      - name: Artifact generation - Windows
+      - name: Artifact generation - emscripten Atari
         #if: startsWith(github.event.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
-          name: windows_artifact_${{ env.AUTO_TAG_NAME }}
+          name: atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}
           path: |
-                result/x86_64-pc-windows-gnu/bin/rustsega.exe
+                rust_rusted_atari2600/result/website/**/*
 
-      - name: Create Release Zip - windows
+      - name: Create Release Zip - emscripten sega
         #if: startsWith(github.event.ref, 'refs/tags/')
         run: |
              cd ..
-             zip -r -j ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rustsega/result/x86_64-pc-windows-gnu/bin/
-      - name: Cache windows release
+             zip -r ${{ runner.temp }}/sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rustsega/result/website/
+
+      - name: Create Release Zip - emscripten atari
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        run: |
+             cd ..
+             zip -r ${{ runner.temp }}/atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rusted_atari2600/result/website/
+
+      - name: Cache emscripten release sega
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
-          key: windows-zip_${{ github.sha }}
+          path: ${{ runner.temp }}/sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+          key: sega_emscripten-zip_${{ github.sha }}
 
+      - name: Cache emscripten release atari
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+          key: atari_emscripten-zip_${{ github.sha }}
+
+      - name: Artifact generation - Windows Sega
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: sega_windows_artifact_${{ env.AUTO_TAG_NAME }}
+          path: |
+                rust_rustsega/result/x86_64-pc-windows-gnu/bin/rustsega.exe
+
+      - name: Artifact generation - Windows Atari
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: atari_windows_artifact_${{ env.AUTO_TAG_NAME }}
+          path: |
+                rust_rusted_atari2600/result/x86_64-pc-windows-gnu/bin/rusted_atari2600.exe
+
+      - name: Create Release Zip - windows sega
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        run: |
+             cd ..
+             zip -r -j ${{ runner.temp }}/sega_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rustsega/result/x86_64-pc-windows-gnu/bin/
+
+      - name: Create Release Zip - windows atari
+        #if: startsWith(github.event.ref, 'refs/tags/')
+        run: |
+             cd ..
+             zip -r -j ${{ runner.temp }}/atari_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rusted_atari2600/result/x86_64-pc-windows-gnu/bin/
+
+      - name: Cache windows release sega
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/sega_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+          key: sega_windows-zip_${{ github.sha }}
+
+      - name: Cache windows release atari
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/atari_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+          key: atari_windows-zip_${{ github.sha }}
 
   create_release:
     name: Create release
@@ -88,7 +134,7 @@ jobs:
       run: |
             gh release create "${{ env.AUTO_TAG_NAME }}"
 
-  create_windows_release:
+  create_sega_windows_release:
     name: Create windows release from cached results
     runs-on: ubuntu-latest
     needs: [create_release, build]
@@ -98,18 +144,39 @@ jobs:
     - name: Cache windows release
       uses: actions/cache@v4
       with:
-        path: ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
-        key: windows-zip_${{ github.sha }}
+        path: ${{ runner.temp }}/sega_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+        key: sega_windows-zip_${{ github.sha }}
 
-    - name: Release Artifacts - windows
+    - name: Release Artifacts - windows sega
       #if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-            gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+            gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/sega_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
 
-  create_emscripten_release:
-    name: Create emscripten release from cached results
+  create_atari_windows_release:
+    name: Create windows release from cached results
+    runs-on: ubuntu-latest
+    needs: [create_release, build]
+
+    steps:
+    - uses: actions/checkout@main
+    - name: Cache windows release
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/atari_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+        key: atari_windows-zip_${{ github.sha }}
+
+    - name: Release Artifacts - windows atari
+      #if: startsWith(github.event.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+            gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/atari_windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
+
+
+  create_sega_emscripten_release:
+    name: Create sega emscripten release from cached results
     runs-on: ubuntu-latest
     needs: [create_release, build]
 
@@ -118,13 +185,34 @@ jobs:
     - name: Cache emscripten release
       uses: actions/cache@v4
       with:
-        path: ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
-        key: emscripten-zip_${{ github.sha }}
+        path: ${{ runner.temp }}/sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+        key: sega_emscripten-zip_${{ github.sha }}
 
     - name: Release Artifacts - emscripten
       #if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-            gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+            gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+
+  create_atari_emscripten_release:
+    name: Create atari emscripten release from cached results
+    runs-on: ubuntu-latest
+    needs: [create_release, build]
+
+    steps:
+    - uses: actions/checkout@main
+    - name: Cache emscripten release
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+        key: atari_emscripten-zip_${{ github.sha }}
+
+    - name: Release Artifacts - emscripten
+      #if: startsWith(github.event.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+            gh release upload "${{ env.AUTO_TAG_NAME }}" ${{ runner.temp }}/atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip
+
 
