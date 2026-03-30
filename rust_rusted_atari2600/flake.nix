@@ -24,12 +24,6 @@
         toolchain = rust-nightly.packages.${system}.rustToolchain;
         platform = rust-nightly.packages.${system}.rustPlatform;
 
-        # Shared cargo dirs for reproducibility
-        cargoEnv = {
-          CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
-          CARGO_HOME       = "${placeholder "out"}/cargo-home";
-        };
-
         # Shared Rust inputs for all targets
         commonInputs = [
           toolchain
@@ -47,6 +41,13 @@
           extraEnv ? {},
           buildPhase
         }:
+          let
+          cargoEnv = {
+            CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target-${pname}";
+            CARGO_HOME       = "${placeholder "out"}/cargo-home-${pname}";
+          };
+
+          in
           platform.buildRustPackage (
             {
               inherit pname version buildInputs;
@@ -82,7 +83,7 @@
       {
         packages = {
           native = mkRustBuild {
-            pname = "rust_rusted_atari2600";
+            pname = "rust_rusted_atari2600-native";
             version = "0.0.1-native";
 
             buildInputs = commonInputs;
@@ -99,17 +100,13 @@
             # Need to disable checks, until the source repo is fixed.
             checkPhase = "";
  
-            # The install isn't (currently) re-distributable.
+            # Currently no install for 'native', would need to package dependencies for it to work.
             installPhase = ''
-               mkdir -p $out/$CARGO_BUILD_TARGET/bin
-               echo "binary shared objects aren't re-distributable" >> $out/$CARGO_BUILD_TARGET/bin/NOTE.txt
-               cp $src/palette_*.dat $out/$CARGO_BUILD_TARGET/bin
-               cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/rusted_atari2600 $out/$CARGO_BUILD_TARGET/bin/
             '';
           };
 
           windows = mkRustBuild {
-            pname = "rust_rusted_atari2600";
+            pname = "rust_rusted_atari2600-windows";
             version = "0.0.1-windows";
 
             checkPhase = "";
@@ -147,7 +144,7 @@
           };
 
           emscripten = mkRustBuild {
-            pname = "rust_rusted_atari2600";
+            pname = "rust_rusted_atari2600-emscripten";
             version = "0.0.1-emscripten";
 
             checkPhase = "";
