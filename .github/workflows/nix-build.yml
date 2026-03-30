@@ -7,6 +7,9 @@ env:
   AUTO_TAG_NAME: ${{ github.ref_name }}_${{ github.sha }}
   PROJ_NAME: rustsega
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
