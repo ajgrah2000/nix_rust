@@ -89,7 +89,7 @@
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "rust-nightly": "rust-nightly",
-        "rustsega": "rustsega"
+        "rusted_atari2600": "rusted_atari2600"
       }
     },
     "rust-nightly": {
@@ -126,20 +126,20 @@
         "type": "github"
       }
     },
-    "rustsega": {
+    "rusted_atari2600": {
       "flake": false,
       "locked": {
-        "lastModified": 1774764263,
-        "narHash": "sha256-cfwUqtxnnUgMGLrlfCgzXTICxzoiaqUq8KaoSwgtfJs=",
+        "lastModified": 1713926870,
+        "narHash": "sha256-VdViK9zq6H/JUSJkscy7TxPjAocpRK/fqruRQ7Y7xc0=",
         "owner": "ajgrah2000",
-        "repo": "rustsega",
-        "rev": "50adfdae71fa91301c096e8a372ccfee472c9f0d",
+        "repo": "rusted_atari2600",
+        "rev": "449eb1f054c4707fbdde971a721a839baf1a8905",
         "type": "github"
       },
       "original": {
         "owner": "ajgrah2000",
-        "ref": "minor_build_refresh",
-        "repo": "rustsega",
+        "ref": "master",
+        "repo": "rusted_atari2600",
         "type": "github"
       }
     },
