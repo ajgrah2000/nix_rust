@@ -69,10 +69,27 @@ jobs:
           path: ${{ runner.temp }}/windows_artifact_${{ env.AUTO_TAG_NAME }}.zip
           key: windows-zip_${{ github.sha }}
 
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+    - uses: actions/checkout@main
+    - name: Create Release
+      #if: startsWith(github.event.ref, 'refs/tags/')
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+            gh release create "${{ env.AUTO_TAG_NAME }}"
+
   create_windows_release:
     name: Create windows release from cached results
     runs-on: ubuntu-latest
-    needs: [create_release, windows_build]
+    needs: [create_release, build]
 
     steps:
     - uses: actions/checkout@main
@@ -92,7 +109,7 @@ jobs:
   create_emscripten_release:
     name: Create emscripten release from cached results
     runs-on: ubuntu-latest
-    needs: [create_release, emscripten_build]
+    needs: [create_release, build]
 
     steps:
     - uses: actions/checkout@main
