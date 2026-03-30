@@ -23,5 +23,6 @@ jobs:
       - name: Build Rust Sega with Nix
         run: |
               cd rust_rustsega
-              nix build .
+              # setting sandbox to false, to bypass my current nightmare of nix + rust + emscripton + SDL2.  Saving battle for another day.
+              nix build . --option sandbox false
 

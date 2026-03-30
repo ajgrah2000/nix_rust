@@ -24,12 +24,6 @@
         toolchain = rust-nightly.packages.${system}.rustToolchain;
         platform = rust-nightly.packages.${system}.rustPlatform;
 
-        # Shared cargo dirs for reproducibility
-        cargoEnv = {
-          CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target";
-          CARGO_HOME       = "${placeholder "out"}/cargo-home";
-        };
-
         # Shared Rust inputs for all targets
         commonInputs = [
           toolchain
@@ -47,6 +41,13 @@
           extraEnv ? {},
           buildPhase
         }:
+          let
+          cargoEnv = {
+            CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target-${pname}";
+            CARGO_HOME       = "${placeholder "out"}/cargo-home-${pname}";
+          };
+
+          in
           platform.buildRustPackage (
             {
               inherit pname version buildInputs;
@@ -82,7 +83,7 @@
       {
         packages = {
           native = mkRustBuild {
-            pname = "rust_rustsega";
+            pname = "rust_rustsega-native";
             version = "0.0.1-native";
 
             buildInputs = commonInputs;
@@ -105,7 +106,7 @@
           };
 
           windows = mkRustBuild {
-            pname = "rust_rustsega";
+            pname = "rust_rustsega-windows";
             version = "0.0.1-windows";
 
             checkPhase = "";
@@ -142,7 +143,7 @@
           };
 
           emscripten = mkRustBuild {
-            pname = "rust_rustsega";
+            pname = "rust_rustsega-emscripten";
             version = "0.0.1-emscripten";
 
             checkPhase = "";
