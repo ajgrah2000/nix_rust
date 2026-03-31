@@ -31,17 +31,13 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/nix
-            /nix/var/nix/gcroots
+          path: ~/.cache/nix
           key: nix-deps-${{ hashFiles('flake.lock', 'rust_nightly/flake.lock') }}
           restore-keys: nix-deps-
 
       - uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/nix
-            /nix/var/nix/gcroots
+          path: ~/.cache/nix
           key: nix-sources-${{ hashFiles('rust_rustsega/flake.lock', 'rust_rusted_atari2600/flake.lock') }}
           restore-keys: nix-sources-
 
