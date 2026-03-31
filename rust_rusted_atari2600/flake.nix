@@ -1,5 +1,5 @@
 {
-  description = "Multi-target Rust build (native, Windows, Emscripten) with shared toolchain";
+  description = "Multi-target Rust build (native, Windows, Emscripten)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -23,41 +23,20 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        repoName = self.name or "rust_rusted_atari2600";
 
         toolchain = rust-nightly.packages.${system}.rustToolchain;
         platform = rust-nightly.packages.${system}.rustPlatform;
 
-        # Shared Rust inputs for all targets
-        commonInputs = [
-          toolchain
-          pkgs.SDL2
-        ];
+        commonInputs = [ toolchain pkgs.SDL2 ];
 
-        # Helper to build Rust packages
-        mkRustBuild = {
-          pname,
-          nativeBuildInputs ? {},
-          version,
-          checkPhase,
-          installPhase ,
-          buildInputs,
-          extraEnv ? {},
-          buildPhase
-        }:
-          let
-          cargoEnv = {
-            CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target-${pname}";
-            CARGO_HOME       = "${placeholder "out"}/cargo-home-${pname}";
-          };
-
-          in
+        mkRustBuild = { pname, version, nativeBuildInputs ? [], buildInputs, buildPhase, checkPhase, installPhase, extraEnv ? {} }:
           platform.buildRustPackage (
             {
-              inherit pname version buildInputs;
-            }
-            // cargoEnv
-            // extraEnv
-            // {
+              inherit pname version buildInputs nativeBuildInputs;
+              src = rusted_atari2600;
+              CARGO_TARGET_DIR = "${placeholder "out"}/cargo-target-${pname}";
+              CARGO_HOME = "${placeholder "out"}/cargo-home-${pname}";
               checkPhase = ''
                 ${checkPhase}
               '';
@@ -69,118 +48,75 @@
                 mkdir -p "$CARGO_HOME" "$CARGO_TARGET_DIR"
                 ${buildPhase}
               '';
-
-              # All targets use the same source/cargo lock.
-              src = rusted_atari2600;
-
-              cargoLock = {
-                lockFile = rusted_atari2600 + "/Cargo.lock";
-              };
-          
+              cargoLock = { lockFile = rusted_atari2600 + "/Cargo.lock"; };
               cargoHash = "sha256-yV0cH7hHsVPkHDiBBOWm9zRr0M5l4Fjfkp4dkmzzbsQ=";
-
-              }
+            }
+            // extraEnv
           );
-
       in
       {
         packages = {
           native = mkRustBuild {
-            pname = "rust_rusted_atari2600-native";
+            pname = "${repoName}-native";
             version = "0.0.1-native";
-
             buildInputs = commonInputs;
-
-            extraEnv = {
-              CARGO_BUILD_TARGET = "x86_64-unknown-linux-gnu";
-            };
- 
-            # Oh my, this can't be right...
             buildPhase = ''
+              export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
               cargo build --offline --release --target=$CARGO_BUILD_TARGET --config $NIX_BUILD_TOP/.cargo/config.toml
             '';
-
-            # Need to disable checks, until the source repo is fixed.
             checkPhase = "";
- 
-            # Currently no install for 'native', would need to package dependencies for it to work.
-            installPhase = ''
-            '';
+            installPhase = "";
           };
 
           windows = mkRustBuild {
-            pname = "rust_rusted_atari2600-windows";
+            pname = "${repoName}-windows";
             version = "0.0.1-windows";
-
             checkPhase = "";
-          
-            nativeBuildInputs =  [pkgs.pkgsCross.mingwW64.stdenv.cc];
             buildInputs = commonInputs ++ [
               pkgs.pkgsCross.mingwW64.stdenv.cc
               pkgs.pkgsCross.mingwW64.SDL2
               pkgs.pkgsCross.mingwW64.sdl3
               pkgs.pkgsCross.mingwW64.windows.pthreads
             ];
-          
-            extraEnv = {
-              CARGO_BUILD_TARGET = "x86_64-pc-windows-gnu";
-              CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER = "${pkgs.pkgsCross.mingwW64.stdenv.cc}/bin/x86_64-w64-mingw32-gcc";
-
-              CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS=''
-                -L native=${pkgs.pkgsCross.mingwW64.SDL2}/lib
-                -L native=${pkgs.pkgsCross.mingwW64.windows.pthreads}/lib
-              '';
-            };
-          
-            # For the current package versions of nix both 'SDL2.dll' and 'SDL3.dll' is needed.
             buildPhase = ''
+              export CARGO_BUILD_TARGET="x86_64-pc-windows-gnu"
+              export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="${pkgs.pkgsCross.mingwW64.stdenv.cc}/bin/x86_64-w64-mingw32-gcc"
+              export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS="-L native=${pkgs.pkgsCross.mingwW64.SDL2}/lib -L native=${pkgs.pkgsCross.mingwW64.windows.pthreads}/lib"
               cargo build --offline --release --target=$CARGO_BUILD_TARGET --config $NIX_BUILD_TOP/.cargo/config.toml
-              '';
-
+            '';
             installPhase = ''
-               mkdir -p $out/$CARGO_BUILD_TARGET/bin
-               cp $src/palette_*.dat $out/$CARGO_BUILD_TARGET/bin
-               cp ${pkgs.pkgsCross.mingwW64.SDL2.dev}/bin/SDL2.dll $out/$CARGO_BUILD_TARGET/bin
-               cp ${pkgs.pkgsCross.mingwW64.sdl3.out}/bin/SDL3.dll $out/$CARGO_BUILD_TARGET/bin
-               cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/rusted_atari2600.exe $out/$CARGO_BUILD_TARGET/bin/
-             '';
+              mkdir -p $out/$CARGO_BUILD_TARGET/${repoName}/bin
+              cp $src/palette_*.dat $out/$CARGO_BUILD_TARGET/${repoName}/bin
+              cp ${pkgs.pkgsCross.mingwW64.SDL2.dev}/bin/SDL2.dll $out/$CARGO_BUILD_TARGET/${repoName}/bin
+              cp ${pkgs.pkgsCross.mingwW64.sdl3.out}/bin/SDL3.dll $out/$CARGO_BUILD_TARGET/${repoName}/bin
+              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/rusted_atari2600.exe $out/$CARGO_BUILD_TARGET/${repoName}/bin/
+            '';
           };
 
           emscripten = mkRustBuild {
-            pname = "rust_rusted_atari2600-emscripten";
+            pname = "${repoName}-emscripten";
             version = "0.0.1-emscripten";
-
             checkPhase = "";
-          
-            extraEnv = {
-              CARGO_BUILD_TARGET = "wasm32-unknown-emscripten";
-              CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER = "${pkgs.emscripten}/bin/emcc";
-              EMSCRIPTEN_NO_PORTS = "1";
-            };
-
-            nativeBuildInputs = [
-              pkgs.emscripten
-            ];
-
-            buildInputs = commonInputs ++ [
-              pkgs.emscripten
-            ];
-
+            nativeBuildInputs = [ pkgs.emscripten ];
+            buildInputs = commonInputs ++ [ pkgs.emscripten ];
             buildPhase = ''
-              echo em ${pkgs.emscripten}
+              export CARGO_BUILD_TARGET="wasm32-unknown-emscripten"
+              export CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER="${pkgs.emscripten}/bin/emcc"
+              export EMSCRIPTEN_NO_PORTS="1"
+              export EM_CACHE="$NIX_BUILD_TOP/emscripten-cache"
               cd projects/emscripten
               cargo build --offline --release --target=$CARGO_BUILD_TARGET --config $NIX_BUILD_TOP/.cargo/config.toml
             '';
             installPhase = ''
-              mkdir -p $out/website/target/$CARGO_BUILD_TARGET/release/
-              cp $src/index.html $out/website/
-              cp $src/file_drop.js $out/website/
-              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.wasm $out/website/target/$CARGO_BUILD_TARGET/release/
-              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.js $out/website/target/$CARGO_BUILD_TARGET/release/
+              mkdir -p $out/website/${repoName}/target/$CARGO_BUILD_TARGET/release/
+              cp $src/index.html $out/website/${repoName}/
+              cp $src/file_drop.js $out/website/${repoName}/
+              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.wasm $out/website/${repoName}/target/$CARGO_BUILD_TARGET/release/
+              cp $CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/*.js $out/website/${repoName}/target/$CARGO_BUILD_TARGET/release/
             '';
           };
 
-          all = pkgs.symlinkJoin {
+          default = pkgs.symlinkJoin {
             name = "all-targets";
             paths = [
               self.packages.${system}.native
@@ -188,8 +124,6 @@
               self.packages.${system}.emscripten
             ];
           };
-
-          default = self.packages.${system}.all;
         };
 
         devShells.default = pkgs.mkShell {
@@ -204,4 +138,3 @@
       }
     );
 }
-

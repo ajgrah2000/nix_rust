@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [sega, atari]
+        target: [rustsega, rusted_atari2600]
         platform: [emscripten, windows]
 
     steps:
@@ -37,18 +37,17 @@ jobs:
 
       - name: Build with Nix
         run: |
-          cd rust_rust${{ matrix.target }}
-          nix build . --option sandbox false
+          nix build .#${{ matrix.target}}-${{ matrix.platform}} --option sandbox false
 
       - name: Package artifact
         run: |
           mkdir -p out
           if [ "${{ matrix.platform }}" = "emscripten" ]; then
             zip -r out/${{ matrix.target }}_emscripten.zip \
-              ${{ github.workspace }}/rust_rust${{ matrix.target }}/result/website/
+              ${{ github.workspace }}/rust_${{ matrix.target }}/result/website/
           else
             zip -j out/${{ matrix.target }}_windows.zip \
-              ${{ github.workspace }}/rust_rust${{ matrix.target }}/result/x86_64-pc-windows-gnu/bin/
+              ${{ github.workspace }}/rust_${{ matrix.target }}/result/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/bin/
           fi
 
       - name: Upload artifact
