@@ -5,7 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
-    rust-nightly.url = "path:../rust_nightly";
+    rust-nightly = {
+      url = "path:../rust_nightly";
+      flake = false;
+    };
 
     rusted_atari2600 = {
       type = "github";
