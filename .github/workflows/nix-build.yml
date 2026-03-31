@@ -22,14 +22,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: cachix/install-nix-action@v27
-
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
         with:
           extra-nix-config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = https://cache.nixos.org/
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/nix
+            /nix/var/nix/gcroots
+          key: nix-${{ hashFiles('**/flake.lock') }}
+          restore-keys: nix-
 
       - name: Build all targets
         run: |
