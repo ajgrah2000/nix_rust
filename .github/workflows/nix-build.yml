@@ -77,9 +77,12 @@ jobs:
         run: |
           mkdir -p out
           if [ "${{ matrix.platform }}" = "emscripten" ]; then
-            zip -r out/${{ matrix.target }}_emscripten.zip results/${{ matrix.target }}-emscripten/website/
+            TARGET_DIR=$(ls -d nix-builds/results/${{ matrix.target }}-emscripten/website/*/)
+            ls -la nix-builds/results/
+            zip -r out/${{ matrix.target }}_emscripten.zip "$TARGET_DIR"
           else
-            zip -j out/${{ matrix.target }}_windows.zip results/${{ matrix.target }}-windows/x86_64-pc-windows-gnu/*/bin/
+            ls -la nix-builds/results/
+            zip -j out/${{ matrix.target }}_windows.zip nix-builds/results/${{ matrix.target }}-windows/x86_64-pc-windows-gnu/*/bin/
           fi
 
       - uses: actions/upload-artifact@v4
