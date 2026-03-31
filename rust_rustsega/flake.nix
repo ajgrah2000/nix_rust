@@ -7,7 +7,7 @@
 
     rust-nightly = {
       url = "path:../rust_nightly";
-      flake = false;
+      flake = true;
     };
 
     rustsega = {
