@@ -37,17 +37,16 @@ jobs:
 
       - name: Build with Nix
         run: |
-          nix build .#${{ matrix.target}}-${{ matrix.platform}} --option sandbox false
+          cd rust_${{ matrix.target }}
+          nix build .#${{ matrix.platform }} --option sandbox false
 
       - name: Package artifact
         run: |
           mkdir -p out
           if [ "${{ matrix.platform }}" = "emscripten" ]; then
-            zip -r out/${{ matrix.target }}_emscripten.zip \
-              ${{ github.workspace }}/rust_${{ matrix.target }}/result/website/
+            zip -r out/${{ matrix.target }}_emscripten.zip result/website/
           else
-            zip -j out/${{ matrix.target }}_windows.zip \
-              ${{ github.workspace }}/rust_${{ matrix.target }}/result/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/bin/
+            zip -j out/${{ matrix.target }}_windows.zip result/x86_64-pc-windows-gnu/*/bin/
           fi
 
       - name: Upload artifact
