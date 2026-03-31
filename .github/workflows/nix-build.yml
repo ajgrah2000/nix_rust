@@ -29,17 +29,7 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = https://cache.nixos.org/
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/nix
-          key: nix-deps-${{ hashFiles('flake.lock', 'rust_nightly/flake.lock') }}
-          restore-keys: nix-deps-
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/nix
-          key: nix-sources-${{ hashFiles('rust_rustsega/flake.lock', 'rust_rusted_atari2600/flake.lock') }}
-          restore-keys: nix-sources-
+      - uses: DeterminateSystems/flakehub-cache-action@main
 
       - name: Build all targets
         run: |
