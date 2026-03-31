@@ -39,6 +39,7 @@ jobs:
 
       - name: Build with Nix
         run: |
+          rm -f rust_${{ matrix.target }}/flake.lock
           cd rust_${{ matrix.target }}
           nix build .#${{ matrix.platform }} --option sandbox false
 
