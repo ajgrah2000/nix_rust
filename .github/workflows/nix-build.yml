@@ -68,8 +68,13 @@ jobs:
             zip -r out/${{ matrix.target }}_emscripten.zip "$TARGET_DIR"
           else
             find . -name "*"
+            echo "Looking"
+            ls .
+            ls ${{ matrix.target }}-windows/
+            ls ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/
             ls ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}
-            zip -j out/${{ matrix.target }}_windows.zip ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/*/
+            ls ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/bin
+            zip -j out/${{ matrix.target }}_windows.zip ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/bin/**/*
           fi
 
       - uses: actions/upload-artifact@v4
