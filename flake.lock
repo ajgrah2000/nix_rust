@@ -290,11 +290,11 @@
         "rusted_atari2600": "rusted_atari2600"
       },
       "locked": {
-        "path": "./rust_rusted_atari2600",
+        "path": "rust_rusted_atari2600",
         "type": "path"
       },
       "original": {
-        "path": "./rust_rusted_atari2600",
+        "path": "rust_rusted_atari2600",
         "type": "path"
       },
       "parent": []
@@ -307,11 +307,11 @@
         "rustsega": "rustsega"
       },
       "locked": {
-        "path": "./rust_rustsega",
+        "path": "rust_rustsega",
         "type": "path"
       },
       "original": {
-        "path": "./rust_rustsega",
+        "path": "rust_rustsega",
         "type": "path"
       },
       "parent": []
