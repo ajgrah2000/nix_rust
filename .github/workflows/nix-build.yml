@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      #      - uses: cachix/install-nix-action@v27
+      - uses: cachix/install-nix-action@v27
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
               nix build . --option sandbox false
 
       - name: Artifact generation - emscripten Sega
-        #if: startsWith(github.event.ref, 'refs/tags/')
+        if: startsWith(github.event.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}
@@ -47,7 +47,7 @@ jobs:
                 rust_rustsega/result/website/**/*
 
       - name: Artifact generation - emscripten Atari
-        #if: startsWith(github.event.ref, 'refs/tags/')
+        if: startsWith(github.event.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}
@@ -55,13 +55,13 @@ jobs:
                 rust_rusted_atari2600/result/website/**/*
 
       - name: Create Release Zip - emscripten sega
-        #if: startsWith(github.event.ref, 'refs/tags/')
+        if: startsWith(github.event.ref, 'refs/tags/')
         run: |
              cd ..
              zip -r ${{ runner.temp }}/sega_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rustsega/result/website/
 
       - name: Create Release Zip - emscripten atari
-        #if: startsWith(github.event.ref, 'refs/tags/')
+        if: startsWith(github.event.ref, 'refs/tags/')
         run: |
              cd ..
              zip -r ${{ runner.temp }}/atari_emscripten_artifact_${{ env.AUTO_TAG_NAME }}.zip nix_rust/rust_rusted_atari2600/result/website/
@@ -168,7 +168,7 @@ jobs:
         key: atari_windows-zip_${{ github.sha }}
 
     - name: Release Artifacts - windows atari
-      #if: startsWith(github.event.ref, 'refs/tags/')
+      if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
@@ -189,7 +189,7 @@ jobs:
         key: sega_emscripten-zip_${{ github.sha }}
 
     - name: Release Artifacts - emscripten
-      #if: startsWith(github.event.ref, 'refs/tags/')
+      if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
@@ -209,7 +209,7 @@ jobs:
         key: atari_emscripten-zip_${{ github.sha }}
 
     - name: Release Artifacts - emscripten
-      #if: startsWith(github.event.ref, 'refs/tags/')
+      if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
