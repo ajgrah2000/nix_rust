@@ -34,17 +34,24 @@ jobs:
           path: |
             ~/.cache/nix
             /nix/var/nix/gcroots
-          key: nix-${{ hashFiles('**/flake.lock') }}
-          restore-keys: nix-
+          key: nix-deps-${{ hashFiles('flake.lock', 'rust_nightly/flake.lock') }}
+          restore-keys: nix-deps-
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/nix
+            /nix/var/nix/gcroots
+          key: nix-sources-${{ hashFiles('rust_rustsega/flake.lock', 'rust_rusted_atari2600/flake.lock') }}
+          restore-keys: nix-sources-
 
       - name: Build all targets
         run: |
-          rm -f rust_rustsega/flake.lock rust_rusted_atari2600/flake.lock
           mkdir -p results
-          (cd rust_rustsega && nix build .#windows -o ../results/rustsega-windows)
-          (cd rust_rustsega && nix build .#emscripten -o ../results/rustsega-emscripten)
-          (cd rust_rusted_atari2600 && nix build .#windows -o ../results/rusted_atari2600-windows)
-          (cd rust_rusted_atari2600 && nix build .#emscripten -o ../results/rusted_atari2600-emscripten)
+          (cd rust_rustsega && nix build .#windows --option sandbox false -o ../results/rustsega-windows)
+          (cd rust_rustsega && nix build .#emscripten --option sandbox false -o ../results/rustsega-emscripten)
+          (cd rust_rusted_atari2600 && nix build .#windows --option sandbox false -o ../results/rusted_atari2600-windows)
+          (cd rust_rusted_atari2600 && nix build .#emscripten --option sandbox false -o ../results/rusted_atari2600-emscripten)
 
       - uses: actions/upload-artifact@v4
         with:
