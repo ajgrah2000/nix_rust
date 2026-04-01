@@ -123,6 +123,9 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
       #    if: github.ref == 'refs/heads/main'
 
     permissions:
@@ -181,5 +184,6 @@ jobs:
           path: _site
 
       - name: Deploy to GitHub Pages
+        id: deploy
         uses: actions/deploy-pages@v4
 
