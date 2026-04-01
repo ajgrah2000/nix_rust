@@ -68,9 +68,6 @@ jobs:
             zip -r out/${{ matrix.target }}_emscripten.zip "$SOURCE_DIR"
           else
             SOURCE_DIR=$(ls -d ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/*/)
-            echo $SOURCE_DIR
-            ls $SOURCE_DIR
-            echo zip -j out/${{ matrix.target }}_windows.zip "$SOURCE_DIR"
             zip -j -r out/${{ matrix.target }}_windows.zip "$SOURCE_DIR"
           fi
 
