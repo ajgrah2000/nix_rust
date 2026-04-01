@@ -153,24 +153,36 @@ jobs:
             echo "=== $dir ==="
             ls -la "$dir"
             echo ""
+            for subdir in "$dir"/*; do
+              if [ -d "$subdir" ]; then
+                echo "  === $subdir ==="
+                ls -la "$subdir"
+                echo ""
+              fi
+            done
           done
 
           mkdir -p _site/rustsega
           mkdir -p _site/rusted_atari2600
 
-          # rustsega
-          if [ -d downloads/rustsega-emscripten/website/rustsega ]; then
+          # Copy index.html
+          cp docs/index.html _site/index.html
+
+          # Find and copy rustsega files
+          if [ -d downloads/rustsega-emscripten/website/rust_rustsega ]; then
+            cp -r downloads/rustsega-emscripten/website/rust_rustsega/* _site/rustsega/
+          elif [ -d downloads/rustsega-emscripten/website/rustsega ]; then
             cp -r downloads/rustsega-emscripten/website/rustsega/* _site/rustsega/
           elif [ -d downloads/rustsega-emscripten/website ]; then
-            echo "=== rustsega-emscripten/website ==="
-            ls -la downloads/rustsega-emscripten/website/
             cp -r downloads/rustsega-emscripten/website/* _site/rustsega/
           else
             echo "Warning: rustsega emscripten build not found"
           fi
           
-          # rusted_atari2600
-          if [ -d downloads/rusted_atari2600-emscripten/website/rusted_atari2600 ]; then
+          # Find and copy rusted_atari2600 files (using rust_rusted_atari2600 as that's the actual directory name)
+          if [ -d downloads/rusted_atari2600-emscripten/website/rust_rusted_atari2600 ]; then
+            cp -r downloads/rusted_atari2600-emscripten/website/rust_rusted_atari2600/* _site/rusted_atari2600/
+          elif [ -d downloads/rusted_atari2600-emscripten/website/rusted_atari2600 ]; then
             cp -r downloads/rusted_atari2600-emscripten/website/rusted_atari2600/* _site/rusted_atari2600/
           elif [ -d downloads/rusted_atari2600-emscripten/website ]; then
             cp -r downloads/rusted_atari2600-emscripten/website/* _site/rusted_atari2600/
