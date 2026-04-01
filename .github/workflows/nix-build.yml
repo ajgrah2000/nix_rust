@@ -127,7 +127,7 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && (github.event.base_ref == 'refs/heads/main' || github.event.base_ref == '')
+    if: startsWith(github.ref, 'refs/tags/deploy_')
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
