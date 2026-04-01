@@ -64,17 +64,11 @@ jobs:
         run: |
           mkdir -p out
           if [ "${{ matrix.platform }}" = "emscripten" ]; then
-            TARGET_DIR=$(ls -d ${{ matrix.target }}-emscripten/website/*/)
-            zip -r out/${{ matrix.target }}_emscripten.zip "$TARGET_DIR"
+            SOURCE_DIR=$(ls -d ${{ matrix.target }}-emscripten/website/*/)
+            zip -r out/${{ matrix.target }}_emscripten.zip "$SOURCE_DIR"
           else
-            find . -name "*"
-            echo "Looking"
-            ls .
-            ls ${{ matrix.target }}-windows/
-            ls ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/
-            ls ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}
-            ls ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/bin
-            zip -j out/${{ matrix.target }}_windows.zip ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/*/
+            SOURCE_DIR=$(ls -d ${{ matrix.target }}-windows/x86_64-pc-windows-gnu/rust_${{ matrix.target }}/*/")
+            zip -j out/${{ matrix.target }}_windows.zip "$SOURCE_DIR"
           fi
 
       - uses: actions/upload-artifact@v4
